@@ -1,6 +1,5 @@
 import operator
 from collections import deque
-import matplotlib.pyplot as plt
 
 PEEA = "ParallelExecutor.ExecuteActions:"
 
@@ -217,15 +216,17 @@ for key, value in sorted(headers.items(), key=operator.itemgetter(1)):
         numbers.append(0)
     numbers[value] += 1
 
-for i in range(len(numbers)):
-    if numbers[i] != 0:
-        print("{0}: {1} headers included {0} times".format(i, numbers[i]))
-
-print("{} headers".format(len(headers)))
-
-plt.bar(range(1, len(numbers)), numbers[1:])
-plt.yscale("log")
-plt.xlabel("Number of times included")
-plt.ylabel("Number of headers included that many times")
-plt.xlim(xmin=1)
-plt.show()
+# for i in range(len(numbers)):
+#     if numbers[i] != 0:
+#         print("{0}: {1} headers included {0} times".format(i, numbers[i]))
+#
+# print("{} headers".format(len(headers)))
+#
+# import matplotlib.pyplot as plt
+#
+# plt.bar(range(1, len(numbers)), numbers[1:])
+# plt.yscale("log")
+# plt.xlabel("Number of times included")
+# plt.ylabel("Number of headers included that many times")
+# plt.xlim(xmin=1)
+# plt.show()
