@@ -3,6 +3,5 @@
 	<BuildConfiguration>
 		<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>
 		<bUseUnityBuild>false</bUseUnityBuild>
-		<bUsePCHFiles>false</bUsePCHFiles>
 	</BuildConfiguration>
 </Configuration>
