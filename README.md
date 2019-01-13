@@ -19,12 +19,16 @@ Basically if you want to speed up your compilation in UE this should help a lot 
 * It'll create 3 csv: *result_includes.csv*, *result_functions.csv*, *result_classes.csv*. You can open those in [wiztree](https://antibody-software.com/web/software/software/wiztree-finds-the-files-and-folders-using-the-most-disk-space-on-your-hard-drive/)
 * 1MB = 1s
 
+## Most included files
+
+The script will print the headers and the number of times they were included. This can be used to decide which headers should go in a PCH.
+
 ## Includes
-See which includes are included by your files, and how long they take to compile. Surprisingly the file itself is often a really small portion of the total compile time. Can help you decide if it's worth moving the functions definitions to a cpp.
+See which headers are included by your files, and how long they take to compile. Surprisingly the file itself is often a really small portion of the total compile time. Can help you decide if it's worth moving the functions definitions to a cpp.
 ![](https://i.imgur.com/XtHL6Ze.png)
 
 ## Classes
-See which classes are compiled in your files, and how long it took. Here too the compiler is probably spending most of its time compiling headers classes.
+See which classes are compiled in your files, and how long it took. Here too the compiler is probably spending most of its time compiling classes from included headers.
 ![](https://i.imgur.com/oPjaMpt.png)
 
 ## Functions
