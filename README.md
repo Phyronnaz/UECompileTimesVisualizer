@@ -1,5 +1,9 @@
 # Unreal Engine Compilation Times Visualizer
 
+**Note: as this is using a disk visualizer as output, the following convention is used:**
+
+**1MB = 1s**
+
 ## What is this
 It's a frontend for the msvc timing output log. With it you'll be able to see which function takes time to compile, which headers are included by your files and how expensive they are...
 
