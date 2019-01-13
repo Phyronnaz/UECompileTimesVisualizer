@@ -24,6 +24,7 @@ else
     Log.TraceLog("{0}", Line);
 }
 ```
+*
   * Rebuild the solution (will only rebuild UBT in a launcher build)
   * Note: some errors/warnings might not be shown with this hack. You should change it back once you're done testing 
 * Once the build is finished, copy `Engine\Programs\UnrealBuildTool\Log.txt` next to **main.py**
