@@ -19,6 +19,14 @@ Basically if you want to speed up your compilation in UE this should help a lot 
 * It'll create 3 csv: *result_includes.csv*, *result_functions.csv*, *result_classes.csv*. You can open those in [wiztree](https://antibody-software.com/web/software/software/wiztree-finds-the-files-and-folders-using-the-most-disk-space-on-your-hard-drive/)
 * 1MB = 1s
 
-![](https://i.imgur.com/oPjaMpt.png)
+## Includes
+See which includes are included by your files, and how long they take to compile. Surprisingly the file itself is often a really small portion of the total compile time. Can help you decide if it's worth moving the functions definitions to a cpp.
 ![](https://i.imgur.com/XtHL6Ze.png)
+
+## Classes
+See which classes are compiled in your files, and how long it took. Here too the compiler is probably spending most of its time compiling headers classes.
+![](https://i.imgur.com/oPjaMpt.png)
+
+## Functions
+See which functions are compiled in your files, and how long it took. Can help determining which function to put between `PRAGMA_DISABLE_OPTIMIZATION` / `PRAGMA_ENABLE_OPTIMIZATION`
 ![](https://i.imgur.com/ICrtPfJ.png)
