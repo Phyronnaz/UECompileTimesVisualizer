@@ -1,4 +1,4 @@
-# UnrealIncludesAnalysis
+# Unreal Engine Compilation Times Visualizer
 
 * Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`
 * Build your solution (the output should be spammed with log)
