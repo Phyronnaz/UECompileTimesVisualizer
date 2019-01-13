@@ -12,4 +12,6 @@
 * It'll create 3 csv: *result_includes.csv*, *result_functions.csv*, *result_classes.csv*. You can open those in [wiztree](https://antibody-software.com/web/software/software/wiztree-finds-the-files-and-folders-using-the-most-disk-space-on-your-hard-drive/)
 * 1MB = 1s
 
-[](https://i.imgur.com/P2Q7RJZ.png)
+![](https://i.imgur.com/oPjaMpt.png)
+![](https://i.imgur.com/XtHL6Ze.png)
+![](https://i.imgur.com/ICrtPfJ.png)
