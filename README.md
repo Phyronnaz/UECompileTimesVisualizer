@@ -1,5 +1,12 @@
 # Unreal Engine Compilation Times Visualizer
 
+## What is this
+It's a frontend for the msvc timing output log. With it you'll be able to see which function takes time to compile, which headers are included by your files and how expensive they are...
+
+Basically if you want to speed up your compilation in UE this should help a lot :)
+
+## Quick start
+
 * Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`
 * Build your solution (the output should be spammed with log)
 * VS might crash because of that. If it happens, you can edit UBT to fix it (works even without a source build!):
