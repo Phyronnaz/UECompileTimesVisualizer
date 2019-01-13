@@ -12,8 +12,16 @@ Basically if you want to speed up your compilation in UE this should help a lot 
 * VS might crash because of that. If it happens, you can edit UBT to fix it (works even without a source build!):
   * Open `Engine\Source\Programs\UnrealBuildTool\UnrealBuildTool.csproj`
   * Open `System\ParallelExecutor.cs`
-  * Find the following line: `Log.TraceInformation("{0}", CompletedAction.LogLines[LineIdx]);` (should be around line 198) and replace it by `Log.TraceLog("{0}", CompletedAction.LogLines[LineIdx]);`
+  * Find the following line: `Log.TraceInformation("{0}", CompletedAction.LogLines[LineIdx]);` (should be around line 198) and replace it by ```var Line = CompletedAction.LogLines[LineIdx];
+if (Line.Contains(" error") || Line.Contains(" warning") || Line.Contains(" note"))
+{
+    Log.TraceInformation("{0}", Line);
+} else
+{
+    Log.TraceLog("{0}", Line);
+}```
   * Rebuild the solution (will only rebuild UBT in a launcher build)
+  * Note: some errors/warnings might not be shown with this hack. You should change it back once you're done testing 
 * Once the build is finished, copy `Engine\Programs\UnrealBuildTool\Log.txt` next to **main.py**
 * Run **main.py** with python
 * It'll create 3 csv: *result_includes.csv*, *result_functions.csv*, *result_classes.csv*. You can open those in [wiztree](https://antibody-software.com/web/software/software/wiztree-finds-the-files-and-folders-using-the-most-disk-space-on-your-hard-drive/)
