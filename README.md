@@ -18,7 +18,8 @@ var Line = CompletedAction.LogLines[LineIdx];
 if (Line.Contains(" error") || Line.Contains(" warning") || Line.Contains(" note"))
 {
     Log.TraceInformation("{0}", Line);
-} else
+}
+else
 {
     Log.TraceLog("{0}", Line);
 }
