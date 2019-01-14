@@ -4,6 +4,8 @@
 
 **1MB = 1s**
 
+Forum thread: https://forums.unrealengine.com/community/community-content-tools-and-tutorials/1572027-c-compile-times-visualizer
+
 ## What is this
 It's a frontend for the msvc timing output log. With it you'll be able to see which function takes time to compile, which headers are included by your files and how expensive they are...
 
