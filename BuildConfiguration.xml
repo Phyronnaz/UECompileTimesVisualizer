@@ -2,6 +2,7 @@
 <Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
 	<BuildConfiguration>
 		<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>
-		<bUseUnityBuild>false</bUseUnityBuild>
+		<!--<bUseUnityBuild>false</bUseUnityBuild>-->
+		<!--<bAdaptiveUnityDisablesPCH>false</bAdaptiveUnityDisablesPCH>-->
 	</BuildConfiguration>
 </Configuration>
