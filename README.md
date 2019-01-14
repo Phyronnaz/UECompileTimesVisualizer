@@ -11,7 +11,8 @@ Basically if you want to speed up your compilation in UE this should help a lot 
 
 ## Quick start
 
-* Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`
+* Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`, or if your already have one add `<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>` to the `BuildConfiguration` section
+ **Note**: Disabling Unity build is recommended to have a better log
 * Build your solution (the output should be spammed with log)
 * VS might crash because of that. If it happens, you can edit UBT to fix it (works even without a source build!):
   * Open `Engine\Source\Programs\UnrealBuildTool\UnrealBuildTool.csproj`
