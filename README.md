@@ -1,4 +1,4 @@
-# Unreal Engine Compilation Times Visualizer
+# Unreal Engine Compile Times Visualizer
 
 **Note: as this is using a disk visualizer as output, the following convention is used:**
 
