@@ -44,7 +44,7 @@ else
 ### MSVC
 
 * Add the following arguments to the **C/C++ Command Line** option in your project settings: `/Bt+ /d2cgsummary /d1reportTime`
-* Add the following arguments to the **Linker Command Line** option in your project settings: `/time+`
+* Add the following argument to the **Linker Command Line** option in your project settings: `/time+`
 * Rebuild your solution. The output should be spammed with log
 * Find your build log file. For me it was under `MyProject/MyProject/Debug/MyProject.log`
 * Copy it next to the **main.py** and rename it to `Log.txt`
@@ -58,9 +58,15 @@ First arg: log file, defaults to `Log.txt`
 
 Second arg: destination, defaults to `result`
 
-## Outputs
+## Links
 
-To correctly understand the meaning of the following sections, you might want to read [this](https://blogs.msdn.microsoft.com/vcblog/2018/01/04/visual-studio-2017-throughput-improvements-and-advice/) 
+[MSVC dev team blog post about compiler speed](https://blogs.msdn.microsoft.com/vcblog/2018/01/04/visual-studio-2017-throughput-improvements-and-advice/)
+
+[Aras P. blog post about compile times](http://aras-p.info/blog/2019/01/12/Investigating-compile-times-and-Clang-ftime-report/)
+
+[How to add PCHs in UE](http://kantandev.com/articles/ue4-includes-precompiled-headers-and-iwyu-include-what-you-use)
+
+## Outputs
 
 ### Most included files
 
