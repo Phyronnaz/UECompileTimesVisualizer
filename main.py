@@ -1,7 +1,9 @@
 import operator
+import sys
 from collections import deque
 
-PEEA = "ParallelExecutor.ExecuteActions:"
+log_file = "Log.txt" if len(sys.argv) < 2 else sys.argv[1]
+dest_files = "result" if len(sys.argv) < 3 else sys.argv[2]
 
 
 def wiztree_internal(filename, size, allocated, modified, attributes, files, folders):
@@ -9,12 +11,18 @@ def wiztree_internal(filename, size, allocated, modified, attributes, files, fol
     assert 0 <= folders
     assert 0 <= size
 
-    return '"{}",{},{},{},{},{},{}'.format(filename.replace('"', ""), size, allocated, modified, attributes, files, folders)
+    return '"{}",{},{},{},{},{},{}'.format(filename.replace('"', ''),
+                                           size,
+                                           allocated,
+                                           modified,
+                                           attributes,
+                                           files,
+                                           folders)
 
 
 def wiztree(filename, size, num_children=0):
     size = int(size * 1000000)
-    return wiztree_internal(filename, size, size, "2019/01/13 15:22:10", 0, num_children, max(0, num_children - 1))
+    return wiztree_internal(filename, size, size, "2019/01/01 00:00:00", 0, num_children, max(0, num_children - 1))
 
 
 class Tree:
@@ -57,35 +65,118 @@ class Tree:
 map = {}
 headers = {}
 
-with open("Log.txt", "r") as file:
+with open(log_file, "r", encoding="utf-8-sig") as file:
+    line = file.readline()
+    is_unreal = "Unreal" in line
+    Prefix = "ParallelExecutor.ExecuteActions:" if is_unreal else ""
+    file.seek(0)
+
+    if is_unreal:
+        print("Unreal log file detected")
+    else:
+        print("MSVC log file detected")
+
+    def get_line():
+        line = file.readline()
+        assert line.startswith(Prefix), "{} does not start with {}".format(line, Prefix)
+        return line[len(Prefix):]
+
+
+    def get_line_for_try():
+        last_pos = file.tell()
+        line = file.readline()
+        file.seek(last_pos)
+        assert line.startswith(Prefix), "{} does not start with {}".format(line, Prefix)
+        return line[len(Prefix):]
+
+
+    def parse_int(string):
+        line = get_line().strip()
+        assert string in line, "{} not in {}".format(string, line)
+        return int(line.split(string)[1])
+
+
+    def parse_float(string, suffix):
+        line = get_line().strip()
+        assert string in line, "{} not in {}".format(string, line)
+        assert line.endswith(suffix), "{} does not end with {}".format(line, suffix)
+        line = line.split(string)[1][:-len(suffix)].strip()
+        if line == "-nan(ind)":
+            return 0
+        else:
+            return float(line)
+
+
     def parse_count():
-        count = file.readline()
-        assert "Count:" in count
-        return int(count.split("Count:")[1])
+        return parse_int("Count:")
 
 
     def parse_total():
-        total = file.readline()
-        assert "Total:" in total, total
-        return float(total.split("Total:")[1].strip()[:-1])
+        return parse_float("Total:", "s")
+
+
+    def parse_seconds(string):
+        return parse_float(string, " sec")
 
 
     def parse_empty():
-        empty = file.readline()
-        assert empty.strip() == PEEA, empty
+        empty = get_line().strip()
+        assert empty == "", empty
 
 
     def parse_top():
-        top = file.readline()
-        assert "(top-level only):" in top, "Invalid top: {}".format(top)
-        assert "Top" in top
+        top = get_line().strip()
+        assert "(top-level only):" in top, "(top-level only) not in " + top
+        assert "Top" in top, "Top not in " + top
         return int(top.split("Top")[1].split("(top-level only):")[0])
 
 
     def parse_string(string):
-        line = file.readline()
-        assert string in line, "{} not in {}!".format(string, line)
-        assert line[len(PEEA):].strip() == string
+        line = get_line().strip()
+        assert line == string, line + "!=" + string
+
+
+    def try_parse_string(string):
+        line = get_line_for_try().strip()
+        if line == string:
+            parse_string(string)
+            return True
+        else:
+            return False
+
+
+    def try_parse_int(string):
+        line = get_line_for_try().strip()
+        if string not in line:
+            return 0
+        else:
+            return parse_int(string)
+
+
+    def try_parse_float(string, suffix):
+        line = get_line_for_try().strip()
+        if string not in line:
+            return 0
+        else:
+            return parse_float(string, suffix)
+
+
+    def try_parse_seconds(string):
+        return try_parse_float(string, " sec")
+
+
+    def try_parse_empty():
+        line = get_line_for_try().strip()
+        if line == "":
+            parse_empty()
+            return True
+        else:
+            return False
+
+
+    def parse_beginstring(string):
+        line = get_line().strip()
+        assert line.startswith(string), "{} does not start with {}".format(line, string)
 
 
     def parse_tree(count, current_file, getname=lambda x: x):
@@ -93,25 +184,27 @@ with open("Log.txt", "r") as file:
         tree = Tree(current_file, 0, 0)
         queue = deque([tree])
         for _ in range(count):
-            include = file.readline()
-            assert include.startswith(PEEA)
+            include = get_line()
             assert include[-1] == "\n"
+            include = include[:-1]
 
-            include = include[len(PEEA):-1]
-            indent = len(include.split(include.lstrip()[0])[0]) - 4
-            assert indent >= 0
+            indent = len(include.split(include.lstrip()[0])[0]) - (4 if is_unreal else 3)
+            assert indent >= 0, "Wrong indent"
+
             include_time = include.split(":")[-1].strip()
-            assert include_time[-1] == "s", include_time
+            assert include_time[-1] == "s", "Wrong time: " + include_time
+
             include_name = getname(include.split(include_time)[0].strip()[:-1])
             include_time = float(include_time[:-1])
 
             if indent > current_indent:
-                assert current_indent + 1 == indent
+                assert current_indent + 1 == indent, "Going from {} indents to {}".format(current_indent, indent)
             else:
                 for _ in range(current_indent - indent + 1):
                     queue.pop()
 
             new_tree = Tree(include_name, include_time, indent)
+            assert len(queue) > 0, "Wrong indent level"
             queue[-1].children.append(new_tree)
             queue.append(new_tree)
             current_indent = indent
@@ -131,7 +224,7 @@ with open("Log.txt", "r") as file:
     def parse_section(current_file, getname=lambda x: x):
         tree = None
         count = parse_count()
-        print("Parsing {} items".format(count))
+        print("    Parsing {} items...".format(count))
         if count > 0:
             tree = parse_tree(count, current_file, getname)
 
@@ -152,54 +245,90 @@ with open("Log.txt", "r") as file:
             assert len(file.readline()) == 0
             break
 
-        if not line.startswith(PEEA):
+        if not line.startswith(Prefix):
             continue
-        line = line[len(PEEA):]
+        line = line[len(Prefix):]
 
-        if not line.lstrip().startswith("["):
+        if is_unreal and not line.lstrip().startswith("["):
             continue
+
         extension = ""
-        for ext in [".cpp", ".rc", ".lib", ".dll"]:
+        for ext in [".cpp", ".rc", ".lib", ".dll", ".exe"]:
             if ext in line:
                 extension = ext
                 break
         else:
             assert False, "Invalid file name: " + line
 
-        current_file = line.split("]")[1].lstrip().split(extension)[0] + extension
-        print("Current file: " + current_file)
+        if is_unreal:
+            line = line.split("]")[1]
 
-        if extension in [".rc", ".lib", ".dll"]:
+        current_file = line.strip().split(extension)[0] + extension
+        print(current_file)
+
+        if extension in [".rc", ".lib", ".dll", ".exe"]:
             print("Skipping")
             continue
 
-        parse_string("Include Headers:")
+        try_parse_string("Unknown compiler version - please run the configure tests and report the results")
+        try_parse_string("Include Headers:")
 
-        print("Parsing includes...")
+        print("    Parsing includes...")
         includes_tree = parse_section(current_file, get_include_name)
-        print("Includes parsed!")
+        print("    Includes parsed!",)
 
         parse_string("Class Definitions:")
 
-        print("Parsing classes...")
+        print("    Parsing classes...")
         classes_tree = parse_section(current_file)
-        print("Classes parsed!")
+        print("    Classes parsed!")
 
         parse_string("Function Definitions:")
 
-        print("Parsing functions...")
+        print("    Parsing functions...")
         functions_tree = parse_section(current_file)
-        print("Functions parsed!")
+        print("    Functions parsed!")
+
+        parse_beginstring("time(")
+
+        if try_parse_string("Code Generation Summary"):
+            parse_int("Total Function Count:")
+            parse_seconds("Elapsed Time:")
+            parse_seconds("Total Compilation Time:")
+            parse_seconds("Average time per function:")
+            for _ in range(try_parse_int("Anomalistic Compile Times:")):
+                get_line()
+            try_parse_int("Serialized Initializer Count:")
+            try_parse_seconds("Serialized Initializer Time:")
+            parse_empty()
+
+        if try_parse_string("RdrReadProc Caching Stats"):
+            parse_int("Functions Cached:")
+            parse_int("Retrieved Count:")
+            parse_int("Abandoned Retrieval Count:")
+            parse_int("Abandoned Caching Count:")
+            parse_int("Wasted Caching Attempts:")
+            parse_int("Functions Retrieved at Least Once:")
+            parse_int("Functions Cached and Never Retrieved:")
+            parse_string("Most Hits:")
+            while not try_parse_empty():
+                get_line()
+            parse_string("Least Hits:")
+            while not try_parse_empty():
+                get_line()
+
+        parse_beginstring("time(")
 
         map[current_file] = includes_tree, classes_tree, functions_tree
+
+        print("")
 
 print("Done!\n\n\n")
 
 for name, index in (("includes", 0), ("classes", 1), ("functions", 2)):
     print("Writing " + name)
-    with open("result_{}.csv".format(name), "w") as file:
-        file.write("Generated by WizTree 3.26 1/13/2019 3:53:08 PM (You can hide this message by making a donation)\n"
-                   "File Name,Size,Allocated,Modified,Attributes,Files,Folders)\n")
+    with open("{}_{}.csv".format(dest_files, name), "w") as file:
+        file.write("File Name,Size,Allocated,Modified,Attributes,Files,Folders)\n")
         num = 0
         for cpp in map:
             num += 1
@@ -209,24 +338,8 @@ for name, index in (("includes", 0), ("classes", 1), ("functions", 2)):
                 tree.compute_num_children()
                 tree.to_wiztree(file)
 
-numbers = []
+print("Done!\n\n\n")
+
+print("Header usage:")
 for key, value in sorted(headers.items(), key=operator.itemgetter(1)):
     print("{}: {}".format(key, value))
-    while len(numbers) <= value:
-        numbers.append(0)
-    numbers[value] += 1
-
-# for i in range(len(numbers)):
-#     if numbers[i] != 0:
-#         print("{0}: {1} headers included {0} times".format(i, numbers[i]))
-#
-# print("{} headers".format(len(headers)))
-#
-# import matplotlib.pyplot as plt
-#
-# plt.bar(range(1, len(numbers)), numbers[1:])
-# plt.yscale("log")
-# plt.xlabel("Number of times included")
-# plt.ylabel("Number of headers included that many times")
-# plt.xlim(xmin=1)
-# plt.show()
