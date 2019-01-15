@@ -4,12 +4,20 @@
 
 **1MB = 1s | 1B = 1 micro second**
 
-Forum thread: https://forums.unrealengine.com/community/community-content-tools-and-tutorials/1572444-c-compile-times-visualizer
-
 ## What is this
 It's a frontend for the msvc timing output log. With it you'll be able to see which function takes time to compile, which headers are included by your files and how expensive they are...
 
 Basically if you want to speed up your compilation in UE or in a project using MSVC this should help a lot :)
+
+## Links
+
+[MSVC dev team blog post about compiler speed](https://blogs.msdn.microsoft.com/vcblog/2018/01/04/visual-studio-2017-throughput-improvements-and-advice/)
+
+[Aras P. blog post about compile times](http://aras-p.info/blog/2019/01/12/Investigating-compile-times-and-Clang-ftime-report/)
+
+[How to add PCHs in UE](http://kantandev.com/articles/ue4-includes-precompiled-headers-and-iwyu-include-what-you-use)
+
+[UE Forum thread](https://forums.unrealengine.com/community/community-content-tools-and-tutorials/1572444-c-compile-times-visualizer)
 
 ## Usage
 
@@ -57,14 +65,6 @@ else
 First arg: log file, defaults to `Log.txt`
 
 Second arg: destination, defaults to `result`
-
-## Links
-
-[MSVC dev team blog post about compiler speed](https://blogs.msdn.microsoft.com/vcblog/2018/01/04/visual-studio-2017-throughput-improvements-and-advice/)
-
-[Aras P. blog post about compile times](http://aras-p.info/blog/2019/01/12/Investigating-compile-times-and-Clang-ftime-report/)
-
-[How to add PCHs in UE](http://kantandev.com/articles/ue4-includes-precompiled-headers-and-iwyu-include-what-you-use)
 
 ## Outputs
 
