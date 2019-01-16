@@ -67,27 +67,36 @@ headers = {}
 
 with open(log_file, "r", encoding="utf-8-sig") as file:
     line = file.readline()
-    is_unreal = "Unreal" in line
-    Prefix = "ParallelExecutor.ExecuteActions:" if is_unreal else ""
     file.seek(0)
 
-    if is_unreal:
-        print("Unreal log file detected")
+    if "Unreal" in line:
+        configuration = "Unreal"
+        prefix = "ParallelExecutor.ExecuteActions:"
+        default_indent = 4
+    elif "Qt" in line:
+        configuration = "Qt"
+        prefix = ""
+        default_indent = 1
     else:
-        print("MSVC log file detected")
+        configuration = "MSVC"
+        prefix = ""
+        default_indent = 3
+
+    print("{} log file detected".format(configuration))
+
 
     def get_line():
         line = file.readline()
-        assert line.startswith(Prefix), "{} does not start with {}".format(line, Prefix)
-        return line[len(Prefix):]
+        assert line.startswith(prefix), "{} does not start with {}".format(line, prefix)
+        return line[len(prefix):]
 
 
     def get_line_for_try():
         last_pos = file.tell()
         line = file.readline()
         file.seek(last_pos)
-        assert line.startswith(Prefix), "{} does not start with {}".format(line, Prefix)
-        return line[len(Prefix):]
+        assert line.startswith(prefix), "{} does not start with {}".format(line, prefix)
+        return line[len(prefix):]
 
 
     def parse_int(string):
@@ -185,11 +194,11 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
         queue = deque([tree])
         for _ in range(count):
             include = get_line()
-            assert include[-1] == "\n"
+            assert include[-1] == "\n", include
             include = include[:-1]
 
-            indent = len(include.split(include.lstrip()[0])[0]) - (4 if is_unreal else 3)
-            assert indent >= 0, "Wrong indent"
+            indent = len(include.split(include.lstrip()[0])[0]) - default_indent
+            assert indent > 0, "Wrong indent: default indent should be {}".format(indent + default_indent - 1)
 
             include_time = include.split(":")[-1].strip()
             assert include_time[-1] == "s", "Wrong time: " + include_time
@@ -245,29 +254,35 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
             assert len(file.readline()) == 0
             break
 
-        if not line.startswith(Prefix):
+        if not line.startswith(prefix):
             continue
-        line = line[len(Prefix):]
+        line = line[len(prefix):]
 
-        if is_unreal and not line.lstrip().startswith("["):
-            continue
+        if configuration == "Unreal":
+            if not line.lstrip().startswith("["):
+                print("Skipping line " + line)
+                continue
+        elif configuration == "Qt":
+            if line[0] == "\t":
+                print("Skipping line " + line)
+                continue
 
         extension = ""
-        for ext in [".cpp", ".rc", ".lib", ".dll", ".exe"]:
+        for ext in [".h", ".cpp", ".rc", ".lib", ".dll", ".exe"]:
             if ext in line:
                 extension = ext
                 break
         else:
             assert False, "Invalid file name: " + line
 
-        if is_unreal:
+        if configuration == "Unreal":
             line = line.split("]")[1]
 
         current_file = line.strip().split(extension)[0] + extension
         print(current_file)
 
         if extension in [".rc", ".lib", ".dll", ".exe"]:
-            print("Skipping")
+            print("Skipping extension " + extension)
             continue
 
         try_parse_string("Unknown compiler version - please run the configure tests and report the results")
@@ -275,7 +290,7 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
 
         print("    Parsing includes...")
         includes_tree = parse_section(current_file, get_include_name)
-        print("    Includes parsed!",)
+        print("    Includes parsed!")
 
         parse_string("Class Definitions:")
 
