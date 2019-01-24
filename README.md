@@ -23,8 +23,10 @@ Basically if you want to speed up your compilation in UE or in a project using M
 
 ### Unreal Engine
 
-* Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`, or if your already have one add `<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>` to the `BuildConfiguration` section
- **Note**: Disabling Unity build is recommended to have a better log
+* Copy **BuildConfiguration.xml** to `%appdata%\Unreal Engine\UnrealBuildTool\BuildConfiguration.xml`, or if your already have one:
+    * add `<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>` to the `BuildConfiguration` category
+    * add `<CompilerVersion>Latest</CompilerVersion>` to the `WindowsPlatform` category (or a toolchain >= to `14.14.26316`)
+    * disabling Unity build is recommended: add `<bUseUnityBuild>false</bUseUnityBuild>` to the `BuildConfiguration` category
 * Build your solution (the output should be spammed with log)
 * VS might crash because of that. If it happens, you can edit UBT to fix it (works even without a source build!):
   * Open `Engine\Source\Programs\UnrealBuildTool\UnrealBuildTool.csproj`

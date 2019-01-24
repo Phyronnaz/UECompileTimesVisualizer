@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Configuration xmlns="https://www.unrealengine.com/BuildConfiguration">
+	<WindowsPlatform>
+		<CompilerVersion>Latest</CompilerVersion>
+	</WindowsPlatform>
 	<BuildConfiguration>
 		<bPrintToolChainTimingInfo>true</bPrintToolChainTimingInfo>
-		<!--<bUseUnityBuild>false</bUseUnityBuild>-->
+		<bUseUnityBuild>false</bUseUnityBuild>
 		<!--<bAdaptiveUnityDisablesPCH>false</bAdaptiveUnityDisablesPCH>-->
 	</BuildConfiguration>
 </Configuration>
