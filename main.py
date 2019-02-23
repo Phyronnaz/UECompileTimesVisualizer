@@ -2,7 +2,17 @@ import operator
 import sys
 from collections import deque
 
-log_file = "Log.txt" if len(sys.argv) < 2 else sys.argv[1]
+if len(sys.argv) < 2:
+    import tkinter as tk
+    from tkinter import filedialog
+
+    root = tk.Tk()
+    root.withdraw()
+
+    log_file = filedialog.askopenfilename(title="Select log file")
+else:
+    log_file = sys.argv[1]
+
 dest_files = "result" if len(sys.argv) < 3 else sys.argv[2]
 
 
