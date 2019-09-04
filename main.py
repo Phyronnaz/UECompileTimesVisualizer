@@ -15,6 +15,41 @@ else:
 
 dest_files = "result" if len(sys.argv) < 3 else sys.argv[2]
 
+def print_debug(*args, **kwargs):
+    # print(*args, **kwargs)
+    pass
+
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+    """
+    valid = {"yes": True, "y": True, "ye": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
 
 def wiztree_internal(filename, size, allocated, modified, attributes, files, folders):
     assert 0 <= files
@@ -243,7 +278,7 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
     def parse_section(current_file, getname=lambda x: x):
         tree = None
         count = parse_count()
-        print("    Parsing {} items...".format(count))
+        print_debug("    Parsing {} items...".format(count))
         if count > 0:
             tree = parse_tree(count, current_file, getname)
 
@@ -270,11 +305,11 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
 
         if configuration == "Unreal":
             if not line.lstrip().startswith("["):
-                print("Skipping line " + line)
+                print("Skipping line " + line.strip())
                 continue
         elif configuration == "Qt":
             if line[0] == "\t":
-                print("Skipping line " + line)
+                print("Skipping line " + line.strip())
                 continue
 
         extension = ""
@@ -298,23 +333,24 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
         try_parse_string("Unknown compiler version - please run the configure tests and report the results")
         try_parse_string("Include Headers:")
 
-        print("    Parsing includes...")
+        print_debug("    Parsing includes...")
         includes_tree = parse_section(current_file, get_include_name)
-        print("    Includes parsed!")
+        print_debug("    Includes parsed!")
 
         parse_string("Class Definitions:")
 
-        print("    Parsing classes...")
+        print_debug("    Parsing classes...")
         classes_tree = parse_section(current_file)
-        print("    Classes parsed!")
+        print_debug("    Classes parsed!")
 
         parse_string("Function Definitions:")
 
-        print("    Parsing functions...")
+        print_debug("    Parsing functions...")
         functions_tree = parse_section(current_file)
-        print("    Functions parsed!")
+        print_debug("    Functions parsed!")
 
         parse_beginstring("time(")
+        parse_beginstring("Elapsed Time before Code Generation:")
 
         if try_parse_string("Code Generation Summary"):
             parse_int("Total Function Count:")
@@ -342,29 +378,53 @@ with open(log_file, "r", encoding="utf-8-sig") as file:
             while not try_parse_empty():
                 get_line()
 
+        parse_beginstring("Elapsed Time after Code Generation:")
         parse_beginstring("time(")
 
         map[current_file] = includes_tree, classes_tree, functions_tree
 
-        print("")
+        print_debug("")
 
 print("Done!\n\n\n")
 
-for name, index in (("includes", 0), ("classes", 1), ("functions", 2)):
-    print("Writing " + name)
-    with open("{}_{}.csv".format(dest_files, name), "w") as file:
-        file.write("File Name,Size,Allocated,Modified,Attributes,Files,Folders)\n")
-        num = 0
-        for cpp in map:
-            num += 1
-            print("{}/{}".format(num, len(map)))
-            tree = map[cpp][index]
-            if tree is not None:
-                tree.compute_num_children()
-                tree.to_wiztree(file)
+if query_yes_no("Write wiztree files?"):
+    for name, index in (("includes", 0), ("classes", 1), ("functions", 2)):
+        print("Writing " + name)
+        with open("{}_{}.csv".format(dest_files, name), "w") as file:
+            file.write("File Name,Size,Allocated,Modified,Attributes,Files,Folders)\n")
+            num = 0
+            for cpp in map:
+                num += 1
+                print("{}/{}".format(num, len(map)), end="\r")
+                tree = map[cpp][index]
+                if tree is not None:
+                    tree.compute_num_children()
+                    tree.to_wiztree(file)
 
-print("Done!\n\n\n")
+    print("Done!\n\n\n")
 
-print("Header usage:")
-for key, value in sorted(headers.items(), key=operator.itemgetter(1)):
-    print("{}: {}".format(key, value))
+if query_yes_no("Print header usage?"):
+    print("Header usage:")
+    for key, value in sorted(headers.items(), key=operator.itemgetter(1)):
+        print("{}: {}".format(key, value))
+
+if query_yes_no("Print cumulative include times?"):
+    headers_cost = {}
+
+    def iterate_includes_tree(tree):
+        if tree.name not in headers_cost:
+            headers_cost[tree.name] = 0
+        headers_cost[tree.name] += tree.time
+
+        for child in tree.children:
+            iterate_includes_tree(child)
+
+    for cpp in map:
+        tree = map[cpp][0]
+        if tree is not None:
+          iterate_includes_tree(tree)
+
+    sorted_headers_cost = sorted(headers_cost.items(), key=operator.itemgetter(1))
+
+    for name, time in sorted_headers_cost:
+        print("{}: included {} times, total time: {}s".format(name.ljust(50), str(headers[name] if name in headers else 1).ljust(4), time))
