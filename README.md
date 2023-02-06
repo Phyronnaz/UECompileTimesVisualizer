@@ -1,5 +1,28 @@
 # Unreal Engine & MSVC Compile Times Visualizer
 
+
+------------------------------------------------------------
+
+------------------------------------------------------------
+
+------------------------------------------------------------
+
+# **This program is outdated**
+
+In recent Unreal Engine versions, you should be able to just set `bPrintToolChainTimingInfo` to true in your BuildConfiguration.xml (see below).
+
+You can then compile Engine\Source\Programs\Windows\CompileTimeAnalyzer and use it to load the .timing files located in your Intermediate folder. 
+
+The Compile Score VS extension also works great with Unreal if you want to see how much you're spending including files: https://marketplace.visualstudio.com/items?itemName=RamonViladomat.CompileScore2022
+
+------------------------------------------------------------
+
+------------------------------------------------------------
+
+------------------------------------------------------------
+
+# Previous Readme
+
 **Note: as this is using a disk visualizer as output, the following convention is used:**
 
 **1MB = 1s | 1B = 1 micro second**
